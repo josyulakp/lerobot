@@ -18,7 +18,7 @@ import math
 import time
 import traceback
 from copy import deepcopy
-
+from STservo_sdk import *
 import numpy as np
 import tqdm
 
@@ -31,10 +31,10 @@ from lerobot.common.utils.utils import capture_timestamp_utc
 import ipdb 
 
 PROTOCOL_VERSION = 0
-BAUDRATE =  115_200 
+BAUDRATE =  115200
 TIMEOUT_MS = 1000
 
-MAX_ID_RANGE = 252
+MAX_ID_RANGE = 20
 
 # The following bounds define the lower and upper joints range (after calibration).
 # For joints in degree (i.e. revolute joints), their nominal range is [-180, 180] degrees
@@ -324,9 +324,9 @@ class FeetechMotorsBus:
         else:
             import scservo_sdk as scs
 
-        self.port_handler = scs.PortHandler(self.port)
-        self.packet_handler = scs.PacketHandler(PROTOCOL_VERSION)
-        self.set_bus_baudrate(115200)
+        self.port_handler = PortHandler(self.port)
+        self.packet_handler = protocol_packet_handler(self.port_handler , PROTOCOL_VERSION)
+        self.set_bus_baudrate(BAUDRATE)
 
         try:
             if not self.port_handler.openPort():
@@ -481,7 +481,7 @@ class FeetechMotorsBus:
                 start_pos = self.calibration["start_pos"][calib_idx]
                 end_pos = self.calibration["end_pos"][calib_idx]
                 # import ipdb
-                ipdb.set_trace()
+                # ipdb.set_trace()
                 # Rescale the present position to a nominal range [0, 100] %,
                 # useful for joints with linear motions like Aloha gripper
                 print("values ", values[i], "start_pos ", start_pos, "end_pos ", end_pos)
@@ -673,10 +673,12 @@ class FeetechMotorsBus:
         return values
 
     def read_with_motor_ids(self, motor_models, motor_ids, data_name, num_retry=NUM_READ_RETRY):
-        if self.mock:
-            import tests.motors.mock_scservo_sdk as scs
-        else:
-            import scservo_sdk as scs
+        # if self.mock:
+        #     import tests.motors.mock_scservo_sdk as scs
+        # else:
+        #     import scservo_sdk as scs
+        from STservo_sdk import GroupSyncRead
+        from STservo_sdk import COMM_SUCCESS
 
         return_list = True
         if not isinstance(motor_ids, list):
@@ -685,16 +687,17 @@ class FeetechMotorsBus:
 
         assert_same_address(self.model_ctrl_table, self.motor_models, data_name)
         addr, bytes = self.model_ctrl_table[motor_models[0]][data_name]
-        group = scs.GroupSyncRead(self.port_handler, self.packet_handler, addr, bytes)
+        group = GroupSyncRead(self.packet_handler, addr, bytes)
+        # print("group", group)
         for idx in motor_ids:
             group.addParam(idx)
 
         for _ in range(num_retry):
             comm = group.txRxPacket()
-            if comm == scs.COMM_SUCCESS:
+            if comm == COMM_SUCCESS:
                 break
 
-        if comm != scs.COMM_SUCCESS:
+        if comm != COMM_SUCCESS:
             raise ConnectionError(
                 f"Read failed due to communication error on port {self.port_handler.port_name} for indices {motor_ids}: "
                 f"{self.packet_handler.getTxRxResult(comm)}"
@@ -712,11 +715,12 @@ class FeetechMotorsBus:
             return values[0]
 
     def read(self, data_name, motor_names: str | list[str] | None = None):
-        print(" in read ")
-        if self.mock:
-            import tests.motors.mock_scservo_sdk as scs
-        else:
-            import scservo_sdk as scs
+        # print(" in read ")
+        # if self.mock:
+        #     import tests.motors.mock_scservo_sdk as scs
+        # else:
+            # import scservo_sdk as scs
+            
 
         if not self.is_connected:
             raise RobotDeviceNotConnectedError(
@@ -737,44 +741,51 @@ class FeetechMotorsBus:
             motor_idx, model = self.motors[name]
             motor_ids.append(motor_idx)
             models.append(model)
-        print("motor names", motor_names)
-        print("motor ids", motor_ids)
+        # print("motor names", motor_names)
+        # print("motor ids", motor_ids)
         assert_same_address(self.model_ctrl_table, models, data_name)
         addr, bytes = self.model_ctrl_table[model][data_name]
         group_key = get_group_sync_key(data_name, motor_names)
-        print("group readers", self.group_readers)
+        # print("group readers", self.group_readers)
         if data_name not in self.group_readers:
-            if data_name != "Torque_Enable":
-                print("data_name", data_name)
-                # Very Important to flush the buffer!
-                self.port_handler.ser.reset_output_buffer()
-                self.port_handler.ser.reset_input_buffer()
-                # ipdb.set_trace()
-                # print("setting up group readers")
-                # create new group reader
-                self.group_readers[group_key] = scs.GroupSyncRead(
-                    self.port_handler, self.packet_handler, addr, bytes
-                )
-                
-                for idx in motor_ids:
-                    self.group_readers[group_key].addParam(idx)
+            # if data_name != "Torque_Enable":
+            # print("data_name", data_name)
+            # Very Important to flush the buffer!
+            self.port_handler.ser.reset_output_buffer()
+            self.port_handler.ser.reset_input_buffer()
+            # ipdb.set_trace()
+            # print("setting up group readers")
+            # create new group reader
+            self.group_readers[group_key] = GroupSyncRead(
+                self.packet_handler, addr, bytes
+            )
+            
+            for idx in motor_ids:
+                self.group_readers[group_key].addParam(idx)
 
         for _ in range(NUM_READ_RETRY):
             comm = self.group_readers[group_key].txRxPacket()
-            if comm == scs.COMM_SUCCESS:
+            if comm == COMM_SUCCESS:
                 break
 
         
-        # if comm != scs.COMM_SUCCESS:
-        #     raise ConnectionError(
-        #         f"Read failed due to communication error on port {self.port} for group_key {group_key}: "
-        #         f"{self.packet_handler.getTxRxResult(comm)}"
-        #     )
+        if comm != COMM_SUCCESS:
+            raise ConnectionError(
+                f"Read failed due to communication error on port {self.port} for group_key {group_key}: "
+                f"{self.packet_handler.getTxRxResult(comm)}"
+            )
 
         values = []
         for idx in motor_ids:
             value = self.group_readers[group_key].getData(idx, addr, bytes)
-            print(idx, "value", value)
+            # print("Port Handler:",self.group_readers[group_key].ph)
+            # print("Start address:",self.group_readers[group_key].start_address)
+            # print("Data Length:",self.group_readers[group_key].data_length)
+            # print("Param:",self.group_readers[group_key].param)
+            # print("Rxpacket:",self.group_readers[group_key].data_dict)
+            # print(idx, "value", value)
+            # print("Timeout:",self.port_handler.setPacketTimeout(60))
+
             values.append(value)
         values = np.array(values)
         print("values ", values)
@@ -795,7 +806,7 @@ class FeetechMotorsBus:
         # log the utc time at which the data was received
         ts_utc_name = get_log_name("timestamp_utc", "read", data_name, motor_names)
         self.logs[ts_utc_name] = capture_timestamp_utc()
-
+        
         return values
 
     def write_with_motor_ids(self, motor_models, motor_ids, data_name, values, num_retry=NUM_WRITE_RETRY):
@@ -869,8 +880,8 @@ class FeetechMotorsBus:
 
         init_group = data_name not in self.group_readers
         if init_group:
-            self.group_writers[group_key] = scs.GroupSyncWrite(
-                self.port_handler, self.packet_handler, addr, bytes
+            self.group_writers[group_key] = GroupSyncWrite(
+                self.packet_handler, addr, bytes
             )
 
         for idx, value in zip(motor_ids, values, strict=True):
@@ -881,7 +892,7 @@ class FeetechMotorsBus:
                 self.group_writers[group_key].changeParam(idx, data)
 
         comm = self.group_writers[group_key].txPacket()
-        if comm != scs.COMM_SUCCESS:
+        if comm != COMM_SUCCESS:
             raise ConnectionError(
                 f"Write failed due to communication error on port {self.port} for group_key {group_key}: "
                 f"{self.packet_handler.getTxRxResult(comm)}"

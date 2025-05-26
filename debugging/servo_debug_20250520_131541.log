@@ -1,0 +1,76 @@
+=== Servo Communication Debug Log ===
+Started: 2025-05-20 13:15:41.311086
+Port: /dev/ttyUSB0, Baudrate: 115200
+
+[13:15:51.806] 
+--- Starting batch position read ---
+[13:15:51.807] 
+Querying servo 1 (attempt 1)
+[13:15:51.807] TX: ffff0104023802be
+[13:15:51.823] RX: ffff010400e7070c
+[13:15:51.823] Response time: 16.43 ms
+[13:15:51.873] 
+Querying servo 2 (attempt 1)
+[13:15:51.873] TX: ffff0204023802bd
+[13:15:51.890] RX: ffff020400600396
+[13:15:51.890] Response time: 16.63 ms
+[13:15:51.940] 
+Querying servo 3 (attempt 1)
+[13:15:51.940] TX: ffff0304023802bc
+[13:15:51.957] RX: ffff030400300cbc
+[13:15:51.957] Response time: 16.53 ms
+[13:15:52.007] 
+Querying servo 4 (attempt 1)
+[13:15:52.007] TX: ffff0404023802bb
+[13:15:52.023] RX: ffff040400150bd7
+[13:15:52.023] Response time: 15.72 ms
+[13:15:52.073] 
+Querying servo 5 (attempt 1)
+[13:15:52.073] TX: ffff0504023802ba
+[13:15:52.090] RX: ffff050400fe07f1
+[13:15:52.090] Response time: 16.65 ms
+[13:15:52.140] 
+Querying servo 6 (attempt 1)
+[13:15:52.140] TX: ffff0604023802b9
+[13:15:52.157] RX: ffff0604000308ea
+[13:15:52.157] Response time: 16.70 ms
+[13:15:52.207] 
+--- Batch position read completed in 400.72 ms ---
+[13:17:03.985] 
+=== Response Time Analysis ===
+[13:17:03.985] 
+--- Iteration 1/5 ---
+[13:17:04.882] 
+--- Iteration 2/5 ---
+[13:17:05.779] 
+--- Iteration 3/5 ---
+[13:17:06.679] 
+--- Iteration 4/5 ---
+[13:17:07.578] 
+--- Iteration 5/5 ---
+[13:17:08.477] 
+=== Analysis Results ===
+[13:17:08.477] Servo 1: Avg=15.97ms, Min=15.75ms, Max=16.27ms, Success=100.0%
+[13:17:08.477] Servo 2: Avg=15.96ms, Min=15.82ms, Max=16.34ms, Success=100.0%
+[13:17:08.477] Servo 3: Avg=16.24ms, Min=15.71ms, Max=16.70ms, Success=100.0%
+[13:17:08.477] Servo 4: Avg=15.77ms, Min=15.67ms, Max=15.94ms, Success=100.0%
+[13:17:08.477] Servo 5: Avg=16.03ms, Min=15.73ms, Max=16.42ms, Success=100.0%
+[13:17:08.477] Servo 6: Avg=16.00ms, Min=15.73ms, Max=16.51ms, Success=100.0%
+[13:17:19.395] 
+=== Testing Communication Parameters ===
+[13:17:19.396] 
+--- Testing timeout: 0.1s ---
+[13:17:19.792] Success rate with timeout=0.1s: 100.0%
+[13:17:19.792] 
+--- Testing timeout: 0.3s ---
+[13:17:20.190] Success rate with timeout=0.3s: 100.0%
+[13:17:20.190] 
+--- Testing timeout: 0.5s ---
+[13:17:20.587] Success rate with timeout=0.5s: 100.0%
+[13:17:20.587] 
+--- Testing timeout: 1.0s ---
+[13:17:20.984] Success rate with timeout=1.0s: 100.0%
+[13:17:20.984] 
+Recommended timeout: 0.1s (Success rate: 100.0%)
+
+Session ended: 2025-05-20 13:17:27.926976
