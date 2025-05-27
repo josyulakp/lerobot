@@ -93,7 +93,9 @@ def configure_motor(port, brand, model, motor_idx_des, baudrate_des):
 
         for baudrate in all_baudrates:
             motor_bus.set_bus_baudrate(baudrate)
-            present_ids = motor_bus.find_motor_indices(list(range(1, 10)))
+            print(f"Trying baudrate: {baudrate}")
+            present_ids = motor_bus.find_motor_indices(list(range(0, 256)))
+            print("Motor ids    ")
             if len(present_ids) > 1:
                 raise ValueError(
                     "Error: More than one motor ID detected. This script is designed to only handle one motor at a time. Please disconnect all but one motor."
@@ -169,7 +171,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, required=True, help="Motor model (e.g. xl330-m077,sts3215)")
     parser.add_argument("--ID", type=int, required=True, help="Desired ID of the current motor (e.g. 1,2,3)")
     parser.add_argument(
-        "--baudrate", type=int, default=1000000, help="Desired baudrate for the motor (default: 1000000)"
+        "--baudrate", type=int, default=115200, help="Desired baudrate for the motor (default: 115200)"
     )
     args = parser.parse_args()
 

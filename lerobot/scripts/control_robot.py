@@ -232,6 +232,7 @@ def calibrate(robot: Robot, cfg: CalibrateControlConfig):
 
 @safe_disconnect
 def teleoperate(robot: Robot, cfg: TeleoperateControlConfig):
+    print("Teleoperation mode")
     control_loop(
         robot,
         control_time_s=cfg.teleop_time_s,

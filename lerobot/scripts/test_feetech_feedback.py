@@ -55,9 +55,9 @@ def test_motor_feedback(port: str, motor_name: str, motor_id: int, motor_model: 
             comm_result = motors_bus.read("Present_Position")
             # ipdb.set_trace()
             print(comm_result)
-            if comm_result != scs.COMM_SUCCESS:
-                error_message = motors_bus.get_comm_result(comm_result)
-                print(f"Communication error: {error_message}")
+            # if comm_result != scs.COMM_SUCCESS:
+            #     error_message = motors_bus.get_comm_result(comm_result)
+            #     print(f"Communication error: {error_message}")
         except Exception as e:
             print(f"Error: {e}")
 
@@ -98,7 +98,7 @@ def test_motor_feedback(port: str, motor_name: str, motor_id: int, motor_model: 
 
 def main():
     # Example usage - replace these values with your actual motor configuration
-    PORT = "/dev/ttyUSB1"  # Replace with your actual port
+    PORT = "/dev/ttyUSB0"  # Replace with your actual port
     MOTOR_NAME = "Present_position"
     MOTOR_ID = [1,2,3,4,5,6]
     MOTOR_MODEL = "sts3215"

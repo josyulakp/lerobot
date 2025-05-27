@@ -244,7 +244,7 @@ Read failed due to communication error on port /dev/tty.usbmodem575E0032081 for 
 /!\ A configuration issue has been detected with your motors:
 If this is the first time you are using these motors, press enter to configure your motors... but before verify that all the cables are connected the proper way. If you find an issue, before making a modification, kill the python process, unplug the power cord to not damage the motors, rewire correctly, then plug the power again and relaunch the script.
 
-Motor indices detected: {9600: [1]}
+Motor indices detected: {115200: [1]}
 
 1. Unplug the power cord
 2. Plug/unplug minimal number of cables to only have the first 1 motor(s) (['shoulder_pan']) connected.

@@ -788,6 +788,10 @@ class FeetechMotorsBus:
 
             values.append(value)
         values = np.array(values)
+        if(motor_ids[5] == 6):
+            print('Leader:')
+        else:
+            print('Follower:')
         print("values ", values)
         # Convert to signed int to use range [-2048, 2048] for our motor positions.
         if data_name in CONVERT_UINT32_TO_INT32_REQUIRED:
@@ -873,7 +877,8 @@ class FeetechMotorsBus:
             values = self.revert_calibration(values, motor_names)
 
         values = values.tolist()
-
+        # 
+        # time.sleep(0.01)  # Reduce write frequency by 10x for 1,000,000 baud rate
         assert_same_address(self.model_ctrl_table, models, data_name)
         addr, bytes = self.model_ctrl_table[model][data_name]
         group_key = get_group_sync_key(data_name, motor_names)

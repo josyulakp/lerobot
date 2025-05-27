@@ -445,14 +445,15 @@ def run_arm_manual_calibration(arm: MotorsBus, robot_type: str, arm_name: str, a
     #     raise ValueError("To run calibration, the torque must be disabled on all motors.")
 
     print(f"\nRunning calibration of {robot_type} {arm_name} {arm_type}...")
+    time.sleep(1)
 
     reset_middle_positions(arm)
 
     print("\nMove arm to zero position")
     print("See: " + URL_TEMPLATE.format(robot=robot_type, arm=arm_type, position="zero"))
     input("Press Enter to continue...")
-    import ipdb
-    ipdb.set_trace() #JOSYULA
+    # import ipdb
+    # ipdb.set_trace() #JOSYULA
     # We arbitrarily chose our zero target position to be a straight horizontal position with gripper upwards and closed.
     # It is easy to identify and all motors are in a "quarter turn" position. Once calibration is done, this position will
     # correspond to every motor angle being 0. If you set all 0 as Goal Position, the arm will move in this position.

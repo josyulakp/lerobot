@@ -248,6 +248,8 @@ def control_loop(
 
         if teleoperate:
             observation, action = robot.teleop_step(record_data=True)
+            print("Observation:", observation)
+            print("Action:", action)
         else:
             observation = robot.capture_observation()
 
