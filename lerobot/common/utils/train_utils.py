@@ -97,8 +97,8 @@ def save_checkpoint(
         scheduler (LRScheduler | None, optional): The scheduler to save the state from. Defaults to None.
     """
     pretrained_dir = checkpoint_dir / PRETRAINED_MODEL_DIR
-    policy.save_pretrained(pretrained_dir)
-    cfg.save_pretrained(pretrained_dir)
+    policy.save_pretrained(pretrained_dir)  # This saves config.json
+    cfg.save_pretrained(pretrained_dir)     # This saves train_config.json
     save_training_state(checkpoint_dir, step, optimizer, scheduler)
 
 
