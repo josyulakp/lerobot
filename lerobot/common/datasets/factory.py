@@ -17,6 +17,7 @@ import logging
 from pprint import pformat
 
 import torch
+import torchvision.transforms as transforms
 
 from lerobot.common.datasets.lerobot_dataset import (
     LeRobotDataset,
@@ -78,14 +79,62 @@ def make_dataset(cfg: TrainPipelineConfig) -> LeRobotDataset | MultiLeRobotDatas
     Returns:
         LeRobotDataset | MultiLeRobotDataset
     """
-    image_transforms = (
-        ImageTransforms(cfg.dataset.image_transforms) if cfg.dataset.image_transforms.enable else None
-    )
-
     if isinstance(cfg.dataset.repo_id, str):
         ds_meta = LeRobotDatasetMetadata(
             cfg.dataset.repo_id, root=cfg.dataset.root, revision=cfg.dataset.revision
         )
+        
+        logging.info(f"Loading dataset: {cfg.dataset.repo_id}")
+        
+        # Check if we need to add resize transforms for camera images with different shapes
+        camera_shapes = {}
+        for key, feature in ds_meta.features.items():
+            if feature.get("dtype") in ["video", "image"] and key.startswith("observation.images."):
+                camera_shapes[key] = feature["shape"]
+                logging.info(f"Found camera '{key}' with shape: {feature['shape']}")
+        
+        # If we have multiple cameras with different shapes, find the common size (use the smallest)
+        if len(camera_shapes) > 1:
+            shapes = list(camera_shapes.values())
+            logging.info(f"Detected {len(shapes)} camera views with shapes: {shapes}")
+            
+            if not all(shape == shapes[0] for shape in shapes):
+                logging.info("Camera shapes are different, need to resize to common dimensions")
+                
+                # Find the smallest dimensions (only consider height and width, not channels)
+                min_height = min(shape[0] for shape in shapes)  # height is first dimension
+                min_width = min(shape[1] for shape in shapes)   # width is second dimension
+                target_size = (min_height, min_width)
+                
+                logging.info(f"Resizing all cameras to smallest dimensions: {target_size}")
+                
+                # Create resize transforms
+                additional_transforms = [transforms.Resize(target_size)]
+                
+                if cfg.dataset.image_transforms.enable:
+                    logging.info("Adding resize transform to existing image transforms")
+                    # Prepend resize to existing transforms
+                    existing_transforms = ImageTransforms(cfg.dataset.image_transforms)
+                    image_transforms = transforms.Compose([
+                        transforms.Resize(target_size),
+                        existing_transforms
+                    ])
+                else:
+                    logging.info("Creating new resize transform (no existing transforms)")
+                    image_transforms = transforms.Compose(additional_transforms)
+            else:
+                logging.info("All camera shapes are the same, no resizing needed")
+                image_transforms = (
+                    ImageTransforms(cfg.dataset.image_transforms) if cfg.dataset.image_transforms.enable else None
+                )
+        else:
+            logging.info(f"Single camera detected or no cameras found. Camera count: {len(camera_shapes)}")
+            image_transforms = (
+                ImageTransforms(cfg.dataset.image_transforms) if cfg.dataset.image_transforms.enable else None
+            )
+        
+        logging.info(f"Final image transforms: {image_transforms}")
+        
         delta_timestamps = resolve_delta_timestamps(cfg.policy, ds_meta)
         dataset = LeRobotDataset(
             cfg.dataset.repo_id,
@@ -114,5 +163,5 @@ def make_dataset(cfg: TrainPipelineConfig) -> LeRobotDataset | MultiLeRobotDatas
         for key in dataset.meta.camera_keys:
             for stats_type, stats in IMAGENET_STATS.items():
                 dataset.meta.stats[key][stats_type] = torch.tensor(stats, dtype=torch.float32)
-
+    
     return dataset

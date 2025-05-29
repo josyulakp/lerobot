@@ -444,6 +444,7 @@ class So101RobotConfig(ManipulatorRobotConfig):
         default_factory=lambda: {
             "main": FeetechMotorsBusConfig(
                 port="/dev/ttyUSB1",
+                port="/dev/ttyUSB1",
                 motors={
                     # name: (index, model)
                     "shoulder_pan": [1, "sts3215"],
@@ -461,6 +462,7 @@ class So101RobotConfig(ManipulatorRobotConfig):
         default_factory=lambda: {
             "main": FeetechMotorsBusConfig(
                 port="/dev/ttyUSB0",
+                port="/dev/ttyUSB0",
                 motors={
                     # name: (index, model)
                     "shoulder_pan": [1, "sts3215"],
@@ -468,6 +470,7 @@ class So101RobotConfig(ManipulatorRobotConfig):
                     "elbow_flex": [3, "sts3215"],
                     "wrist_flex": [4, "sts3215"],
                     "wrist_roll": [5, "sts3215"],
+                    "gripper": [7, "sts3215"],
                     "gripper": [7, "sts3215"],
                 },
             ),
@@ -488,22 +491,29 @@ class So101RobotConfig(ManipulatorRobotConfig):
             #     width=640,
             #     height=480,
             # ),
+            
             "top": OpenCVCameraConfig(
                 camera_index=0,
-                fps=10, 
+                fps=30,
                 width=1280,
                 height=800,
             ),
-            "side": IntelRealSenseCameraConfig(
-                # name="Intel RealSense D405",
-                serial_number=244222073195,
+            # "side": IntelRealSenseCameraConfig(
+            #     # name="Intel RealSense D405",
+            #     serial_number=244222073195,
+            #     fps=30,
+            #     width=640,
+            #     height=480,
+            # ),
+            "side": OpenCVCameraConfig(
+                camera_index=2  ,
                 fps=30,
                 width=640,
                 height=480,
             ),
         }
     )
-
+        
     mock: bool = False
 
 

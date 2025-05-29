@@ -107,7 +107,10 @@ def update_policy(
 
 @parser.wrap()
 def train(cfg: TrainPipelineConfig):
-    cfg.validate()
+    cfg.batch_size = 16
+    print(cfg.batch_size, cfg.num_workers, cfg.policy.device)
+    # exit()
+    cfg.validate()  # Validate the configuration
     logging.info(pformat(cfg.to_dict()))
 
     if cfg.wandb.enable and cfg.wandb.project:
@@ -140,7 +143,6 @@ def train(cfg: TrainPipelineConfig):
         cfg=cfg.policy,
         ds_meta=dataset.meta,
     )
-
     logging.info("Creating optimizer and scheduler")
     optimizer, lr_scheduler = make_optimizer_and_scheduler(cfg, policy)
     grad_scaler = GradScaler(device.type, enabled=cfg.policy.use_amp)

@@ -120,7 +120,9 @@ def make_policy(
             "Current implementation of VQBeT does not support `mps` backend. "
             "Please use `cpu` or `cuda` backend."
         )
-
+    #write cfg to a json file
+    import json
+    
     policy_cls = get_policy_class(cfg.type)
 
     kwargs = {}

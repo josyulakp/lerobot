@@ -492,7 +492,7 @@ class protocol_packet_handler(object):
         return result
 
     def syncReadRx(self, data_length, param_length):
-        wait_length = (6 + data_length) * param_length + 100
+        wait_length = (6 + data_length) * param_length + 1000
         self.portHandler.setPacketTimeout(wait_length)
         rxpacket = []
         rx_length = 0
